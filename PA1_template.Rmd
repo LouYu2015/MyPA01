@@ -1,0 +1,105 @@
+---
+output:
+  html_document:
+    keep_md: yes
+---
+# My Assignment
+
+## Loading and preprocessing the data
+
+```{r}
+library(ggplot2)
+setwd("c:\\users\\user\\desktop")
+data = read.csv("activity.csv")
+```
+
+## What is mean total number of steps taken per day?
+
+Total number of steps taken per day.
+
+```{r}
+stepPerDay = xtabs(steps ~ date, data = data)
+print(as.data.frame(stepPerDay))
+```
+
+A histogram of the total number of steps taken each day.
+
+```{r}
+barplot(names.arg = names(stepPerDay), stepPerDay, xlab = "Intervals", ylab = "Steps")
+```
+
+
+The mean and median of the total number of steps taken per day.
+
+```{r}
+summary(as.vector(stepPerDay))[c("Mean", "Median")]
+```
+
+## What is the average daily activity pattern?
+
+A time series plot.
+
+```{r}
+freqPerInt = xtabs(steps ~ interval, data = data)
+freqPerInt = freqPerInt / xtabs(!is.na(steps) ~ interval, data = data)
+freqPerInt = as.data.frame(freqPerInt)
+ggplot(freqPerInt, aes(x = as.numeric(as.character(interval)), y = Freq)) +
+  geom_line() +
+  xlab("Interval") +
+  ylab("Steps")
+```
+
+Which interval contains the maximun number of step.
+
+```{r}
+as.character(freqPerInt$interval[which.max(freqPerInt$Freq)])
+```
+
+## Imputing missing values
+
+Summery of NAs in the data set.
+
+```{r}
+table(!complete.cases(data))
+```
+
+Fill in the NAs.
+
+```{r}
+for(i in 1:dim(data)[1])
+  if(is.na(data$steps[i]))
+  {
+    if(!is.na(freqPerInt$Freq[data$interval[i] / 5 + 1]))
+      data$steps[i] = freqPerInt$Freq[data$interval[i] / 5 + 1]
+    else
+      data$steps[i] = stepPerDay[names(stepPerDay) == data$date[i]][1]
+  }
+```
+
+Make a histogram of the total number of steps taken each day.
+
+```{r}
+stepPerDay = xtabs(steps ~ date, data = data)
+barplot(stepPerDay)
+```
+
+Mean and median total number of steps taken per day.
+
+```{r}
+summary(as.vector(stepPerDay))[c("Median", "Mean")]
+```
+
+## Are there differences in activity patterns between weekdays and weekends?
+
+Create a new factor variable in data frame.
+
+```{r}
+data$weekday = factor(weekdays(as.Date(as.character(data$date))) %in% c("Saturday","Sunday"), levels = c(TRUE, FALSE), labels = c("weekend", "weekday"))
+freqPerInt2 = as.data.frame(xtabs(steps ~ interval + weekday, data = data))
+```
+
+Creat final plot.
+
+```{r}
+ggplot(freqPerInt2, aes(x = as.numeric(as.character(interval)), y = Freq)) + geom_line() +  facet_grid(weekday ~ .) + xlab("Interval")+ ylab("steps")
+```
