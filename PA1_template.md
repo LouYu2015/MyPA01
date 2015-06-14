@@ -14,6 +14,7 @@ library(ggplot2)
 ```r
 setwd("c:\\users\\user\\desktop")
 data = read.csv("activity.csv")
+data$interval = (data$interval %% 100) / 60 + as.integer(data$interval / 100)
 ```
 
 ## What is mean total number of steps taken per day?
@@ -124,8 +125,8 @@ freqPerInt = freqPerInt / xtabs(!is.na(steps) ~ interval, data = data)
 freqPerInt = as.data.frame(freqPerInt)
 ggplot(freqPerInt, aes(x = as.numeric(as.character(interval)), y = Freq)) +
   geom_line() +
-  xlab("Interval") +
-  ylab("Steps")
+  xlab("Interval") + ylab("Steps") +
+  xlim(0,24) + ylim(0, NA)
 ```
 
 ![](PA1_template_files/figure-html/unnamed-chunk-5-1.png) 
@@ -138,7 +139,7 @@ as.character(freqPerInt$interval[which.max(freqPerInt$Freq)])
 ```
 
 ```
-## [1] "835"
+## [1] "8.58333333333333"
 ```
 
 ## Imputing missing values
@@ -189,7 +190,7 @@ summary(as.vector(stepPerDay))[c("Median", "Mean")]
 
 ```
 ## Median   Mean 
-##  10400  10280
+##  10400   9373
 ```
 
 ## Are there differences in activity patterns between weekdays and weekends?
@@ -206,7 +207,10 @@ Creat final plot.
 
 
 ```r
-ggplot(freqPerInt2, aes(x = as.numeric(as.character(interval)), y = Freq)) + geom_line() +  facet_grid(weekday ~ .) + xlab("Interval")+ ylab("steps")
+ggplot(freqPerInt2, aes(x = as.numeric(as.character(interval)), y = Freq)) +
+  geom_line() +  facet_grid(weekday ~ .) + 
+  xlab("Interval")+ ylab("steps") +
+  xlim(0,24) + ylim(0, NA)
 ```
 
 ![](PA1_template_files/figure-html/unnamed-chunk-12-1.png) 

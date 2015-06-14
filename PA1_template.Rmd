@@ -11,6 +11,7 @@ output:
 library(ggplot2)
 setwd("c:\\users\\user\\desktop")
 data = read.csv("activity.csv")
+data$interval = (data$interval %% 100) / 60 + as.integer(data$interval / 100)
 ```
 
 ## What is mean total number of steps taken per day?
@@ -45,8 +46,8 @@ freqPerInt = freqPerInt / xtabs(!is.na(steps) ~ interval, data = data)
 freqPerInt = as.data.frame(freqPerInt)
 ggplot(freqPerInt, aes(x = as.numeric(as.character(interval)), y = Freq)) +
   geom_line() +
-  xlab("Interval") +
-  ylab("Steps")
+  xlab("Interval") + ylab("Steps") +
+  xlim(0,24) + ylim(0, NA)
 ```
 
 Which interval contains the maximun number of step.
@@ -94,12 +95,15 @@ summary(as.vector(stepPerDay))[c("Median", "Mean")]
 Create a new factor variable in data frame.
 
 ```{r}
-data$weekday = factor(weekdays(as.Date(as.character(data$date))) %in% c("Saturday","Sunday"), levels = c(TRUE, FALSE), labels = c("weekend", "weekday"))
+data$weekday = factor(weekdays(as.Date(as.character(data$date))) %in% c("ÐÇÆÚÁù","ÐÇÆÚÈÕ"), levels = c(TRUE, FALSE), labels = c("weekend", "weekday"))
 freqPerInt2 = as.data.frame(xtabs(steps ~ interval + weekday, data = data))
 ```
 
 Creat final plot.
 
 ```{r}
-ggplot(freqPerInt2, aes(x = as.numeric(as.character(interval)), y = Freq)) + geom_line() +  facet_grid(weekday ~ .) + xlab("Interval")+ ylab("steps")
+ggplot(freqPerInt2, aes(x = as.numeric(as.character(interval)), y = Freq)) +
+  geom_line() +  facet_grid(weekday ~ .) + 
+  xlab("Interval")+ ylab("steps") +
+  xlim(0,24) + ylim(0, NA)
 ```
